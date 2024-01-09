@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>AR-Booth</title>
+    <link
+    rel="icon"
+    type="image/png"
+    href="https://Assets.vossle.com/frontend2/icons/favicon.png"
+  />
+    
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <!-- <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script> -->
+    <script src="./arjs.js"></script>
+   <script src="https://cdn.8thwall.com/web/xrextras/xrextras.js"></script>
+   <script src="https://Assets.vossle.com/frontend2/js/animation-aframe-extras.min.js"></script>
+    <script src="./gesture-detector.js"></script>
+    <script src="./hold-drag.js"></script>
+    <script src="./pinch-scale.js"></script>
+    <script src="./two-finger-spin.js"></script>
+    <script src="./tap-to.js"></script>
+    <script src="./chroma.js"
+    crossorigin="anonymous">
+    </script>
+    <script src="https://Assets.vossle.com/frontend2/js/index.umd.js"></script>
+    <script src="https://Assets.vossle.com/frontend2/js/capture-video-frame.js"></script>
+    <!-- <script src="../markerless1/api.js"></script> -->
+
+    <style>
+      html, body {
+       overflow: hidden;
+        width: 100vw!important;
+        height: 100vh!important;
+        margin: 0!important;
+      }
+
+      .a-dialog-allow-button {
+         background-color: rgba(19, 136, 1, 0.834);
+         color:white
+        }
+
+      .a-dialog-deny-button {
+          background-color: rgb(248, 248, 248);
+          color: rgb(33, 30, 30);
+        }
+        #splash-screen {
+    
+    width: 100vw;
+    height: 100vh;
+    background-color: #ff6500;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 105;
+    overflow: scroll;
+}
+
+#start-button {
+   
+    width: 10rem;
+    bottom: 2rem;
+    visibility: none;
+    z-index: 105;
+}
+
+#countdown-screen {
+   
+    width: 100vw;
+    height: 100vh;
+    background-image: url('./players/countdownScreen.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 105000;
+    visibility: visible;
+    display: none;
+    flex-direction: column;
+}
+
+.countdown-image {
+    width: 20%;
+    position: absolute;
+    top: 50%;
+    left: 40%;
+    display: none;
+}
+
+.playerimg{
+ width: 150px;
+ height: auto;
+}
+
+     
+      .selected {
+            border: 2px solid #00f; /* Add a border to indicate selection */
+        }
+        #popup {
+            display: none;
+            position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f5f5f5;
+    padding: 20px;
+    border: 2px solid white;
+    z-index: 300;
+    color: #ff6500;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bolder;
+    font-family: system-ui;
+        }
+
+
+       
+    #results{
+      display: none;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  z-index: 110;
+  width: 100%;
+  height: 100%; 
+}
+
+#save{
+  position: absolute;
+  top: 86%;
+  left: 5%;
+  right: 10%;
+  width: 30px;
+  height: auto;
+  z-index: 10;
+}
+
+#hide{
+ position: absolute;
+   top: 5%;
+   left: 3%; 
+   
+   width: 100%;
+   height: auto;
+   z-index: 10;
+}
+#share-img{
+   position: absolute;
+   top: 86%;
+   left: 10%;
+   right: 10%;
+   width: 30px;
+   height: auto;
+   z-index: 10;
+   margin-left: 25px;
+}
+.info-results{
+  position: absolute;
+  margin: auto;
+  top: 15%;
+  left: 5%;
+  right: 5%;
+  display: none;
+  z-index: 1;
+}
+    .center-btn-screen {
+  position: absolute; 
+  width: 18vw;
+  max-width: 20vw;
+  height: 18vw;
+  top: 0; 
+  bottom: -84%; 
+  left: 0; 
+  right: 0; 
+  margin: auto; 
+  z-index: 1;         
+}
+.info {
+  position: absolute;
+  top: 3.5%;
+  right: 5%;
+  margin: auto;
+  z-index: 100;
+}
+
+.info.button{
+  z-index: 100;
+}
+.share {
+  position: absolute; 
+  bottom: 5%; 
+  right: 7%;
+  margin: auto; 
+  z-index: 100;
+}
+.location { 
+  position: absolute;
+  width: 9vw;
+  height: 9vw;
+  bottom: 5%; 
+  left: 5%;
+  margin: auto; 
+  z-index: 100;
+}
+.timer{
+  position: absolute; 
+  top: 20; 
+  bottom: 80; 
+  left: 45%;  
+  padding-top: 1%;
+  z-index:5;
+  margin: auto; 
+  display: none;
+}
+/* #loader {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.315);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+#arjs-loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block; /* show the loader by default */
+  /* add more styles as needed */
+}
+
+    </style>
+  </head>
+
+  <body>
+    <div class="specific" id="screenshot-container"></div>
+    <div id="splash-screen" >
+      <img id="banner1" style="width: 15em; margin-bottom: 2vh;" src="./players/bannersplash.png" alt="banner1">
+      <div id="row1" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player1" class="playerimg"  src="./players/ergin.png" alt="Player1" onclick="toggleSelection('player1')">
+        <img id="player2" class="playerimg"   src="./players/Jerian.png" alt="Player2" onclick="toggleSelection('player2')">
+        <img id="player3" class="playerimg"  src="./players/Juancho.png" alt="Player3" onclick="toggleSelection('player3')">
+      </div>
+      <div id="row2" class="playerimg" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player4" class="playerimg"  src="./players/Kostas.png" alt="Player4" onclick="toggleSelection('player4')">
+        <img id="player5" class="playerimg"   src="./players/KostasA.png" alt="Player5" onclick="toggleSelection('player5')">
+        <img id="player6" class="playerimg"  src="./players/loannis.png" alt="Player6" onclick="toggleSelection('player6')">
+      </div>
+      <div id="row2" class="playerimg" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player7"class="playerimg"  src="./players/Mathias.png" alt="Player7" onclick="toggleSelection('player7')">
+        <img id="player8" class="playerimg"   src="./players/Marius.png" alt="Player8" onclick="toggleSelection('player8')">
+        <img id="player9"  class="playerimg"  src="./players/Ninos.png" alt="Player9" onclick="toggleSelection('player9')">
+      </div>
+      <div style="display: flex; flex-direction: row; justify-content: flex-end; width: 100%; margin-top: 50px;">
+      <img  id = "start-button" src="./players/startbtn.png" alt="Button"  onclick="startGame()">
+      </div>
+    </div>
+
+    <div id="popup">
+      <p>Please select 2 players before starting.</p>
+      <button style="background: #ff6500;
+      border: 0px;
+      padding: 6px;
+      color: white;" onclick="closePopup()">OK</button>
+  </div>
+  
+
+  <div id="countdown-screen">
+    <img class="countdown-image" id="countdown-5" src="./players/countdown.svg" alt="5">
+    <img class="countdown-image" id="countdown-4" src="./players/countdown4.svg" alt="5">
+    <img class="countdown-image" id="countdown-3" src="./players/countdowna.svg" alt="5">
+    <img class="countdown-image" id="countdown-2" src="./players/countdownb.svg" alt="5">
+    <img class="countdown-image" id="countdown-1" src="./players/countdownc.svg" alt="5">
+    <img class="countdown-image" id="countdown-0" src="./players/countdownd.svg" alt="5">
+
+    </div>
+   
+     
+
+    
+ <button style=" position: absolute; top: 0px; border-radius: 15px ; background-color: white;
+ color: #ff6500;
+ border: 0px;  z-index: 110;" id="fullscreen-button" onclick="">Fullscreen</button>
+
+<!-- <button type="button" id="btn" style="position: absolute; top: 0;" class="btn btn-default">Take a Screenshot!</button> -->
+   
+
+  
+
+    
+ 
+      <a id="descarga-link" href="#"></a>
+    </div>
+    <!-- Model content for displaying grey color  -->
+    <div id="myModelBg" class="Model-bg info-results">
+    </div>
+    <!-- create screenshot layer -->
+
+    <div id="results" class="">
+      <img src="./players/boothicon1.png" />
+      <img src="" id="img" />
+
+      <!-- screenshot image will be display within this div -->
+    </div>
+    <!-- used for image watermark -->
+    <img src="https://Assets.vossle.com/frontend2/logo/vossle-logo.png" id="watermark" style="display: none" />
+    <!-- end create screenshot layer -->
+    <!-- End screenshot button -->
+    <!-- Logo -->
+    <!-- <img
+      src="https://Assets.vossle.com/frontend2/logo/vossle-logo.png"
+      width="90"
+      height="auto"
+      id="logo-1"
+    /> -->
+
+    <img id="image9" src="" style="    z-index: 100000;
+    width: 350px;
+    display: none;
+    height: 1000px;
+    position: absolute;
+    bottom: 50px;
+      margin-left: -50px">
+
+<img id="image10" src=" " style="    z-index: 100000;
+width: 350px;
+display: none;
+height: 1000px;
+position: absolute;
+bottom: 50px;
+margin-left: 400px;">
+                          <!-- audio element -->
+     <audio id="my-audio" src=""></audio>
+
+     <div id="vid_play" class="name" style="  position: absolute; 
+     top: 20vh; 
+     bottom: 100px; 
+     left: 0px; 
+     right: 0px;   
+     padding-top: 50%;
+     padding-left: 8rem;
+     margin: auto; 
+     display: none;
+     z-index: 105;
+     ">
+      <img
+        src="https://Assets.vossle.com/frontend2/icons/tapStart.png"
+        alt=""
+        width="50%"
+        height="auto"
+        display="none"
+      />
+    </div>
+
+    <a-scene
+      arjs-loader
+      tap-place
+      embedded arjs = " debugUIEnabled: false;"
+      gesture-detector
+      renderer="logarithmicDepthBuffer: true; colorManagement: true; precision: mediump"
+      vr-mode-ui="enabled: false"
+      debugUIEnabled: false;
+      xrweb="allowedDevices: any"
+      reflection="directionalLight:a-light#dirlight;"
+      >
+
+      
+      <a-assets>
+        <a-asset-item id="model"  src=" "  ></a-asset-item>
+        <!-- <video id="video" loop muted playsinline ></video> 
+        <video id="video1" loop muted playsinline ></video>  -->
+        <img id="image" src="">
+        <img id="image1" src="">
+      </a-assets>
+
+      
+      <a-camera
+      id="camera"
+      
+      
+      wasd-controls-enabled="false"
+      look-controls-enabled="false"
+      position="0 2 8"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+    
+
+      <a-entity
+      light="
+        type: directional;
+        intensity: 1;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 20;
+        shadowCameraBottom: -20;
+        shadowCameraRight: 20;
+        shadowCameraLeft: -20;
+        target: #entity"
+      xrextras-attach="target: entity offset: 8 15 4"
+      position="1 4.3 2.5"
+      shadow>
+    </a-entity>
+    <a-light type="ambient" intensity="0.5"></a-light>
+
+
+      <a-entity 
+      id="entity"
+      shadow="receive: false"
+      class="cantap"
+      visible="false"
+      two-finger-spin pinch-scale 
+      reflections="type: realtime"
+      animation-mixer=" loop: repeat"
+      shadow="receive: false"
+      scale ="2 2 2"
+      static-body
+       ></a-entity>
+      
+       <a-plane
+      id = "entityimage"
+      shadow="receive: false"
+      class="cantap"
+      visible="false"
+      two-finger-spin pinch-scale 
+      scale="4 6 2"
+      position="-2.5 1 0"
+      material="src: #image; opacity: 1; roughness: 0; metalness: 0; transparent: false">
+     </a-plane>
+
+     <a-plane
+     id = "entityimage1"
+     shadow="receive: false"
+     class="cantap"
+     visible="false"
+     two-finger-spin pinch-scale 
+     scale="2 2 2"
+     material="src: #image; opacity: 1; roughness: 0; metalness: 0; transparent: false">
+    </a-plane>
+
+        <a-video 
+        id = "entityvideo"
+        position="-3 1 0"
+        scale="4 10 2"
+        reflections="type: realtime"
+        shadow="receive: false"
+        visible = "false"
+        ></a-video>
+
+        <a-video 
+        id = "entityvideo1"
+        position="2.8 1 0"
+        scale="4 10 2"
+        reflections="type: realtime"
+        shadow="receive: false"
+        visible = "false"
+        ></a-video>
+
+       <a-box
+       id="ground"
+       class="cantap"
+       scale="1000 2 1000"
+       position="0 -1 0"
+       material="shader: shadow; transparent: true; opacity: 0"
+       shadow>
+     </a-box>
+    </a-scene>
+
+   
+  </body>
+  <script>
+
+let selectedPlayers = [];
+
+function toggleSelection(playerId) {
+    const playerImage = document.getElementById(playerId);
+
+    
+
+    // Check if the player is already selected
+    const index = selectedPlayers.indexOf(playerId);
+    if (index !== -1) {
+        // Player is already selected, remove the selection
+        selectedPlayers.splice(index, 1);
+        if(playerId == 'player1'){
+      playerImage.src = './players/ergin.png'
+    }
+    else if(playerId == 'player2'){
+      playerImage.src = './players/Jerian.png'
+    }
+    else if(playerId == 'player3'){
+      playerImage.src = './players/Juancho.png'
+    }
+    else if(playerId == 'player4'){
+      playerImage.src = './players/Kostas.png'
+    }
+    else if(playerId == 'player5'){
+      playerImage.src = './players/KostasA.png'
+    }
+    else if(playerId == 'player6'){
+      playerImage.src = './players/loannis.png'
+    }
+    else if(playerId == 'player7'){
+      playerImage.src = './players/Mathias.png'
+    }
+    else if(playerId == 'player8'){
+      playerImage.src = './players/Marius.png'
+    }
+    else if(playerId == 'player9'){
+      playerImage.src = './players/Ninos.png'
+    }
+    
+    } else {
+        // Player is not selected, add the selection
+
+        if(playerId == 'player1'){
+      playerImage.src = './players/ergin-selected.png'
+    }
+    else if(playerId == 'player2'){
+      playerImage.src = './players/Jerian-selected.png'
+    }
+    else if(playerId == 'player3'){
+      playerImage.src = './players/Juancho-selected.png'
+    }
+    else if(playerId == 'player4'){
+      playerImage.src = './players/KostasS-selected.png'
+    }
+    else if(playerId == 'player5'){
+      playerImage.src = './players/kostas-selected.png'
+    }
+    else if(playerId == 'player6'){
+      playerImage.src = './players/loannis-selected.png'
+    }
+    else if(playerId == 'player7'){
+      playerImage.src = './players/Mathias-selected.png'
+    }
+    else if(playerId == 'player8'){
+      playerImage.src = './players/Marius-selected.png'
+    }
+    else if(playerId == 'player9'){
+      playerImage.src = './players/ntinos-selected.png'
+    }
+    
+        selectedPlayers.push(playerId);
+        
+        
+    }
+}
+
+function startGame() {
+    if (selectedPlayers.length === 2) {
+      console.log(selectedPlayers[0])
+        // Proceed with starting the game and apply animations to selected players
+        var splashScreen = document.getElementById("splash-screen");
+         var startButton = document.getElementById("start-button");
+          var countdownScreen = document.getElementById("countdown-screen");
+
+          
+            
+        
+        //   const video = document.getElementById('video');
+        //   const video1 = document.getElementById('video1');
+        //   const entityVideo = document.getElementById('entityvideo');
+        // const entityVideo1 = document.getElementById('entityvideo1');
+
+        const entityImage = document.getElementById("entityimage");
+        const entityImage1 = document.getElementById("entityimage");
+        // entityImage.setAttribute('visible', 'true');
+       const image = document.getElementById('image9');
+       const image1 = document.getElementById('image10');
+    
+    
+        
+       
+     if(selectedPlayers[0] == 'player1'){
+      image.setAttribute('src', './videos/erignimg.png');
+     }
+     if(selectedPlayers[0] == 'player2'){
+      image.setAttribute('src', './videos/jerian.png');
+     }
+     if(selectedPlayers[0] == 'player3'){
+      image.setAttribute('src', './videos/Hernagomez.png');
+     }
+     if(selectedPlayers[0] == 'player4'){
+      image.setAttribute('src', './videos/kostasSimg.png');
+     }
+     if(selectedPlayers[0] == 'player5'){
+      image.setAttribute('src', './videos/KostasA.png');
+     }
+     if(selectedPlayers[0] == 'player6'){
+      image.setAttribute('src', './videos/loannis.png');
+     }
+     if(selectedPlayers[0] == 'player7'){
+      image.setAttribute('src', './videos/Mathias.png');
+     }
+     if(selectedPlayers[0] == 'player8'){
+      image.setAttribute('src', './videos/marius.png');
+     }
+     if(selectedPlayers[0] == 'player9'){
+      image.setAttribute('src', './videos/ntinos.png');
+     }
+     if(selectedPlayers[1] == 'player1'){
+      image1.setAttribute('src', './videos/erignimg.png');
+     }
+     if(selectedPlayers[1] == 'player2'){
+      image1.setAttribute('src', './videos/jerian.png');
+     }
+     if(selectedPlayers[1] == 'player3'){
+      image1.setAttribute('src', './videos/Hernagomez.png');
+     }
+     if(selectedPlayers[1] == 'player4'){
+      image1.setAttribute('src', './videos/kostasSimg.png');
+     }
+     if(selectedPlayers[1] == 'player5'){
+      image1.setAttribute('src', './videos/KostasA.png');
+     }
+     if(selectedPlayers[1] == 'player6'){
+      image1.setAttribute('src', './videos/loannis.png');
+     }
+     if(selectedPlayers[1] == 'player7'){
+      image1.setAttribute('src', './videos/Mathias.png');
+     }
+     if(selectedPlayers[1] == 'player8'){
+      image1.setAttribute('src', './videos/marius.png');
+     }
+     if(selectedPlayers[1] == 'player9'){
+      image1.setAttribute('src', './videos/ntinos.png');
+     }
+     
+        
+     entityImage.setAttribute('material', `src: #image; opacity: 1; roughness: 0; metalness: 0; transparent: false`);
+     entityImage1.setAttribute('material', `src: #image; opacity: 1; roughness: 0; metalness: 0; transparent: false`);
+
+              
+           
+            // entityimage.setAttribute('visible', 'true');
+            // entityImage1.setAttribute('visible', 'true');
+            document.getElementById('image9').style.display = 'block';
+            document.getElementById('image10').style.display = 'block';
+
+
+          splashScreen.style.display = "none";
+
+           startButton.style.display = "none";
+        countdownScreen.style.display = 'block';
+         
+        countdown(6); 
+
+        // Add your animation logic here
+    } else {
+        // Show the popup if 2 players are not selected
+        document.getElementById('popup').style.display = 'block';
+    }
+
+
+function closePopup() {
+    // Close the popup
+    document.getElementById('popup').style.display = 'none';
+}
+
+
+function countdown(seconds) {
+          var n = seconds;
+          
+         
+           
+             document.getElementById('countdown-screen').style.zIndex = '1';
+             document.getElementById('countdown-screen').style.position= 'absolute';
+        for (let i = seconds; i > 0; i--) {
+            setTimeout(() => {
+             
+                document.getElementById(`countdown-${i}`).style.display = 'block';
+                if(i < n){
+                  document.getElementById(`countdown-${i+1}`).style.display = 'none'; 
+                }
+                
+          
+                
+                
+            }, (seconds - i) * 1500);
+        }
+
+        // After countdown, start the game or add your logic here
+        setTimeout(() => {
+            document.getElementById('countdown-screen').style.display = 'none';
+           
+
+            // Add your animation logic here
+        }, seconds * 1500);
+    }
+
+  
+  
+    // Get references to the splash screen and start button
+    // var splashScreen = document.getElementById("splash-screen");
+    // var startButton = document.getElementById("start-button");
+    // var countdownScreen = document.getElementById("countdown-screen");
+    // const audio1 = document.getElementById("my-audio");
+   
+
+
+    // // Hide the splash screen when the Start button is clicked
+    // startButton.addEventListener("click", function() {
+    //   // document.querySelector("#video").play();
+    //   splashScreen.style.display = "none";
+
+    //   startButton.style.display = "none";
+    //   countdownScreen.style.display = 'block';
+    //   video.play()
+    // });
+
+    
+
+     
+        console.log(selectedPlayers[1])
+        // image.setAttribute('src', './videos/ergin.mp4');
+       
+
+
+        document.getElementById("start-button").style.visibility = "visible";
+
+        // entityimage.setAttribute("color", '0 0.6 0.9');
+    
+    // arjsloader.style.display = "none";
+    // var taptoplay = document.getElementById("vid_play");
+    // taptoplay.style.display = "block"
+    // taptoplay.addEventListener('click', () => {
+    //     taptoplay.style.display = "none"
+    //     entityimage.setAttribute('visible' , 'true');
+        
+
+  
+            
+
+
+      }
+
+      var splashScreen = document.getElementById("splash-screen");
+            // Check if the browser supports fullscreen API
+            function requestFullscreen() {
+                if (splashScreen.requestFullscreen) {
+                    splashScreen.requestFullscreen();
+                } else if (splashScreen.mozRequestFullScreen) { // Firefox
+                    splashScreen.mozRequestFullScreen();
+                } else if (splashScreen.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    splashScreen.webkitRequestFullscreen();
+                } else if (splashScreen.msRequestFullscreen) { // IE/Edge
+                    splashScreen.msRequestFullscreen();
+                }
+            }
+
+            var fullscreenButton = document.getElementById("fullscreen-button");
+            fullscreenButton.addEventListener("click", requestFullscreen);
+            fullscreenButton.addEventListener("click", console.log('hello'));
+        
+ 
+      function closePopup() {
+        // Close the popup
+        document.getElementById('popup').style.display = 'none';
+
+        
+    }
+
+    
+</script>
+<script>      
+  AFRAME.components.screenshot.Component.prototype.getRenderTarget = function (width, height) {
+      return new THREE.WebGLRenderTarget(width, height, {
+        minFilter: THREE.LinearFilter,
+        magFilter: THREE.LinearFilter,
+        wrapS: THREE.ClampToEdgeWrapping,
+        wrapT: THREE.ClampToEdgeWrapping,
+        format: THREE.RGBAFormat,
+        type: THREE.UnsignedByteType
+      });
+    }
+</script>
+<script src="./screenshot.js"></script>
+
+
+<!-- <script
+    src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript"
+    src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script>
+    document.getElementById('btn').addEventListener('click', function() {
+      var canvas = document.getElementsByClassName('a-canvas')
+     var gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });  
+      html2canvas(document.querySelector('.specific'), {
+          onrendered: function(canvas) {
+              // document.body.appendChild(canvas);
+            return Canvas2Image.saveAsPNG(canvas);
+          }
+      });
+  });
+</script> -->
+    
+
+</html>

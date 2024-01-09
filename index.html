@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Access</title>
+    <script src="https://smtpjs.com/v3/smtp.js">
+    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style type="text/css">
+        html, body {
+       overflow: hidden;
+        width: 100vw!important;
+        height: 100vh!important;
+        margin: 0!important;
+      }
+
+
+.videoObject {
+    height: 100vh;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    overflow: hidden; /* Add overflow: hidden to hide any potential content overflow */
+}
+
+#videoElement {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn {
+    height: 100px;
+    width: 725px;
+    background: cornflowerblue;
+    font-weight: bold;
+    font-size: 56px;
+}
+
+#splash-screen {
+    
+    width: 100vw;
+    height: 100vh;
+    background-color: #ff6500;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 105;
+    overflow: scroll;
+}
+#end-screen{
+    width: 100vw;
+    height: 100vh;
+    background-color: #ff6500;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    z-index: 103221125;
+    overflow: scroll;
+    display: none;
+    
+}
+
+#start-button {
+   
+    width: 10rem;
+    bottom: 2rem;
+    visibility: none;
+    z-index: 105;
+}
+
+
+#countdown-screen {
+   
+   width: 100vw;
+   height: 100vh;
+   background-image: url('./players/countdownScreen.png');
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+   display: flex;
+   flex-direction: column;
+   justify-content: flex-start;
+   align-items: center;
+   z-index: 105000;
+   visibility: visible;
+   display: none;
+   flex-direction: column;
+}
+
+.countdown-image {
+   width: 20%;
+   position: absolute;
+   top: 50%;
+   left: 40%;
+   display: none;
+}
+
+.playerimg{
+width: 150px;
+height: auto;
+}
+
+    
+     .selected {
+           border: 2px solid #00f; /* Add a border to indicate selection */
+       }
+       #popup {
+           display: none;
+           position: fixed;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   background-color: #f5f5f5;
+   padding: 20px;
+   border: 2px solid white;
+   z-index: 300;
+   color: #ff6500;
+   font-size: 16px;
+   text-align: center;
+   font-weight: bolder;
+   font-family: system-ui;
+       }
+      
+   #results{
+     display: none;
+ position: absolute;
+ margin: auto;
+ top: 0;
+ z-index: 110;
+ width: 100%;
+ height: 100%; 
+}
+
+#save{
+ position: absolute;
+ top: 86%;
+ left: 5%;
+ right: 10%;
+ width: 30px;
+ height: auto;
+ z-index: 10;
+}
+
+#hide{
+position: absolute;
+  top: 5%;
+  left: 3%; 
+  
+  width: 100%;
+  height: auto;
+  z-index: 10;
+}
+#share-img{
+  position: absolute;
+  top: 86%;
+  left: 10%;
+  right: 10%;
+  width: 30px;
+  height: auto;
+  z-index: 10;
+  margin-left: 25px;
+}
+.info-results{
+ position: absolute;
+ margin: auto;
+ top: 15%;
+ left: 5%;
+ right: 5%;
+ display: none;
+ z-index: 1;
+}
+   .center-btn-screen {
+ position: absolute; 
+ width: 18vw;
+ max-width: 20vw;
+ height: 18vw;
+ top: 0; 
+ bottom: -84%; 
+ left: 0; 
+ right: 0; 
+ margin: auto; 
+ z-index: 1;         
+}
+.info {
+ position: absolute;
+ top: 3.5%;
+ right: 5%;
+ margin: auto;
+ z-index: 100;
+}
+
+.info.button{
+ z-index: 100;
+}
+.share {
+ position: absolute; 
+ bottom: 5%; 
+ right: 7%;
+ margin: auto; 
+ z-index: 100;
+}
+.location { 
+ position: absolute;
+ width: 9vw;
+ height: 9vw;
+ bottom: 5%; 
+ left: 5%;
+ margin: auto; 
+ z-index: 100;
+}
+.timer{
+ position: absolute; 
+ top: 20; 
+ bottom: 80; 
+ left: 45%;  
+ padding-top: 1%;
+ z-index:5;
+ margin: auto; 
+ display: none;
+}
+
+
+    </style>
+</head>
+
+<body>
+
+    <div class="specific" id="screenshot-container"></div>
+    <div id="splash-screen" >
+      <img id="banner1" style="width: 15em; margin-bottom: 2vh;" src="./players/bannersplash.png" alt="banner1">
+      <div id="row1" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player1" class="playerimg"  src="./players/ergin.png" alt="Player1" onclick="toggleSelection('player1')">
+        <img id="player2" class="playerimg"   src="./players/Jerian.png" alt="Player2" onclick="toggleSelection('player2')">
+        <img id="player3" class="playerimg"  src="./players/Juancho.png" alt="Player3" onclick="toggleSelection('player3')">
+      </div>
+      <div id="row2" class="playerimg" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player4" class="playerimg"  src="./players/Kostas.png" alt="Player4" onclick="toggleSelection('player4')">
+        <img id="player5" class="playerimg"   src="./players/KostasA.png" alt="Player5" onclick="toggleSelection('player5')">
+        <img id="player6" class="playerimg"  src="./players/loannis.png" alt="Player6" onclick="toggleSelection('player6')">
+      </div>
+      <div id="row2" class="playerimg" style="display: flex; flex-direction: row; justify-content: center;">
+        <img id="player7"class="playerimg"  src="./players/Mathias.png" alt="Player7" onclick="toggleSelection('player7')">
+        <img id="player8" class="playerimg"   src="./players/Marius.png" alt="Player8" onclick="toggleSelection('player8')">
+        <img id="player9"  class="playerimg"  src="./players/Ninos.png" alt="Player9" onclick="toggleSelection('player9')">
+      </div>
+      <div style="display: flex; flex-direction: row; justify-content: flex-end; width: 100%; margin-top: 50px;">
+      <img  id = "start-button" src="./players/startbtn.png" alt="Button"  onclick="startGame()">
+      </div>
+    </div>
+
+
+    <div id="popup">
+        <p>Please select 2 players before starting.</p>
+        <button style="background: #ff6500;
+        border: 0px;
+        padding: 6px;
+        color: white;" onclick="closePopup()">OK</button>
+    </div>
+    
+  
+    <div id="countdown-screen">
+      <img class="countdown-image" id="countdown-5" src="./players/countdown.svg" alt="5">
+      <img class="countdown-image" id="countdown-4" src="./players/countdown4.svg" alt="5">
+      <img class="countdown-image" id="countdown-3" src="./players/countdowna.svg" alt="5">
+      <img class="countdown-image" id="countdown-2" src="./players/countdownb.svg" alt="5">
+      <img class="countdown-image" id="countdown-1" src="./players/countdownc.svg" alt="5">
+      <img class="countdown-image" id="countdown-0" src="./players/countdownd.svg" alt="5">
+  
+      </div>
+     
+       
+  
+      
+   <button style=" position: absolute; top: 0px; border-radius: 15px ; background-color: white;
+   color: #ff6500;
+   border: 0px;  z-index: 110;" id="fullscreen-button" onclick="">Fullscreen</button>
+  
+  <div id="end-screen">
+    <h1 style="font-size: 20px; font-weight: 700; color: #f5f5f5;"> Enter Your E-Mail to recieve the Image</h1>
+    <input type="email" id="emailInput" placeholder="Enter Email" style=" border-radius: 15px; background-color: white; color: #2600ff; border: 0px; z-index: 1133120; padding: 20px; margin-bottom: 20px; width: 50vw;">
+
+  <button style=" border-radius: 15px ; background-color: white;
+  color: #2600ff; padding: 12px;
+  border: 0px;  z-index: 1133120;" id="email" onclick="sendEmail()">Send Email</button>
+  <!-- <button type="button" id="btn" style="position: absolute; top: 0;" class="btn btn-default">Take a Screenshot!</button> -->
+     
+</div>
+  <img id="image9" src="" style="    z-index: 100000;
+  width: 350px;
+  display: none;
+  height: 1000px;
+  position: absolute;
+  bottom: 50px;
+    margin-left: -50px">
+
+<img id="image10" src=" " style="    z-index: 100000;
+    width: 350px;
+    display: none;
+    height: 1000px;
+    position: absolute;
+    bottom: 50px; 
+    margin-left: 400px;"> 
+  
+    
+    <!-- Making video object to display video -->
+    <div class="videoObject">
+        <video id="videoElement"  width="100px" height="100px" autoplay="true"></video>
+        <!-- <button id="capture" class="btn">Capture Image</button> -->
+        <!-- Canvas to display the captured picture -->
+        <!-- <canvas id="image" class="canvas"></canvas> -->
+    </div>
+
+
+</body>
+<script src="script.js"></script>
+</html>
